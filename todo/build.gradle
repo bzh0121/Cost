@@ -1,0 +1,11 @@
+apply plugin: 'com.android.library'
+
+apply from:'../dep_common.gradle'
+
+android {
+    namespace 'cc.bzzzh.todo'
+}
+
+dependencies {
+    implementation project(path: ":base")
+}

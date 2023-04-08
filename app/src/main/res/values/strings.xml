@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">靓靓记账</string>
+
+    <string name="bottom_bar_items">明细</string>
+    <string name="bottom_bar_chart">图表</string>
+    <string name="bottom_bar_discover">发现</string>
+    <string name="bottom_bar_person">我的</string>
+    <string name="bottom_bar_add">添加</string>
+</resources>

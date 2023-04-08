@@ -1,0 +1,36 @@
+pluginManagement {
+    repositories {
+        maven {url REPO_CENTRAL}
+        maven {url REPO_GOOGLE}
+        maven {url REPO_GRADLE_PLIGIN}
+        maven {url REPO_JITPECK}
+
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        maven {url REPO_CENTRAL}
+        maven {url REPO_GOOGLE}
+        maven {url REPO_GRADLE_PLIGIN}
+        maven {url REPO_JITPECK}
+
+        google()
+        mavenCentral()
+
+//        repositories {
+//            flatDir {
+//                dirs new File(rootProject.projectDir.getAbsolutePath() + '/libs')
+//            }
+//        }
+    }
+}
+rootProject.name = "Cost"
+include ':app'
+include ':base'
+include ':add'
+include ':daily'
+include ':todo'

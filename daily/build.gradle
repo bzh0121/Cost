@@ -1,0 +1,11 @@
+apply plugin: 'com.android.library'
+
+apply from:'../dep_common.gradle'
+
+android {
+    namespace 'cc.bzzzh.daily'
+}
+
+dependencies {
+    implementation project(path: ":base")
+}

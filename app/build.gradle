@@ -1,0 +1,183 @@
+apply plugin: 'com.android.application'
+
+apply from:'../dep_common.gradle'
+
+android {
+    namespace 'cc.bzzzh.cost'
+    defaultConfig {
+        applicationId "cc.bzzzh.cost"
+    }
+
+    //配置keystore签名
+    signingConfigs {
+        release {
+            storeFile file("cost.jks")
+            storePassword "bzh123456"
+            keyAlias "cost"
+            keyPassword "bzh123456"
+        }
+    }
+}
+
+dependencies {
+    implementation project(path: ":base")
+    implementation project(path: ":add")
+    implementation project(path: ":daily")
+    implementation project(path: ":todo")
+}
+
+//plugins {
+//    id 'com.android.application'
+//    id 'org.jetbrains.kotlin.android'
+//
+//    id 'kotlin-kapt'
+//    id 'com.google.dagger.hilt.android'
+//    id 'androidx.navigation.safeargs.kotlin'
+//
+//    id 'kotlin-parcelize'
+//}
+//
+//android {
+//    namespace 'cc.bzzzh.cost'
+//    compileSdk 33
+//
+//    defaultConfig {
+//        applicationId "cc.bzzzh.cost"
+//        minSdk 26
+//        targetSdk 33
+//        versionCode 1
+//        versionName "1.0"
+//
+//        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+//        vectorDrawables {
+//            useSupportLibrary true
+//        }
+//    }
+//
+//    buildTypes {
+//        release {
+//            minifyEnabled false
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+//        }
+//    }
+//    compileOptions {
+//        sourceCompatibility JavaVersion.VERSION_1_8
+//        targetCompatibility JavaVersion.VERSION_1_8
+//    }
+//    kotlinOptions {
+//        jvmTarget = '1.8'
+//    }
+//    buildFeatures {
+//        compose true
+//    }
+//    composeOptions {
+//        kotlinCompilerExtensionVersion '1.4.3'
+//    }
+//    packagingOptions {
+//        resources {
+//            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+//        }
+//    }
+//}
+//
+//kapt {
+//    correctErrorTypes true
+//}
+//
+//dependencies {
+//
+//    testImplementation 'junit:junit:4.13.2'
+//    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+//    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+//
+//
+//    //compose BoM
+//    def composeBom = platform('androidx.compose:compose-bom:2023.01.00')
+//    implementation composeBom
+//    androidTestImplementation composeBom
+//
+//    // Choose one of the following:
+//    // Material Design 3
+//    implementation 'androidx.compose.material3:material3'
+//    // or Material Design
+////    implementation "androidx.compose.material:material"
+//    // or only import the main APIs for the underlying toolkit systems,
+//    // such as input and measurement/layout
+//    implementation 'androidx.compose.ui:ui'
+//
+//    // Android Studio Preview support
+//    implementation 'androidx.compose.ui:ui-tooling-preview'
+//    debugImplementation 'androidx.compose.ui:ui-tooling'
+//
+//    // UI Tests
+//    androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
+//    debugImplementation 'androidx.compose.ui:ui-test-manifest'
+//
+//    // Optional - Integration with activities
+//    implementation 'androidx.activity:activity-compose:1.7.0'
+//    // Optional - Integration with ViewModels
+//    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1'
+//    // Optional - Integration with LiveData
+//    implementation 'androidx.compose.runtime:runtime-livedata'
+//
+//    // navigation for compose
+//    def nav_version = "2.5.3"
+//    implementation "androidx.navigation:navigation-compose:$nav_version"
+//
+//    //glide for compose
+//    implementation "com.github.bumptech.glide:compose:1.0.0-alpha.1"
+//
+//    //hilt with navigation-compose
+//    implementation 'androidx.hilt:hilt-navigation-compose:1.0.0'
+//
+//    //Jetpack Compose integration
+//    implementation "androidx.paging:paging-compose:1.0.0-alpha18"
+//
+//    //状态栏
+//    implementation "com.google.accompanist:accompanist-systemuicontroller:0.28.0"
+//
+//    //collectAsStateWithLifecycle
+//    implementation "androidx.lifecycle:lifecycle-runtime-compose:2.6.1"
+//
+////    implementation deps.appcompat
+////    implementation deps.material
+////    implementation deps.constraintLayout
+//    implementation deps.aacCommon
+//    implementation deps.aacRuntime
+//    implementation deps.kotlinLib
+//    implementation deps.ktxCore
+//    implementation deps.ktxFrag
+//    implementation deps.ktxNavigationRun
+//    implementation deps.ktxNavigation
+//    implementation deps.ktxNavigationUi
+//    implementation deps.recyclerview
+//    implementation deps.legacySupport
+//    implementation deps.lifecycleViewModel
+//    implementation deps.lifecycleLiveData
+//    implementation deps.ketLifecycleLivedata
+//    implementation deps.kotlinCoroutinesCore
+//    implementation deps.kotlinCoroutinesAndroid
+//    implementation deps.ketLifecycleRuntime
+//    implementation deps.palette
+//    implementation deps.paging
+//    implementation deps.roomPaging
+//
+////    implementation deps.bugly
+////    implementation deps.glide
+////    kapt deps.glidecompiler
+//    implementation deps.gson
+////    implementation deps.retrofit
+////    implementation deps.retrofitConverterGson
+////    implementation deps.okhttp3
+////    implementation deps.ijkplayerJava
+////    implementation deps.ijkplayerArm64
+////    implementation deps.loadsir
+//    implementation deps.mmkv
+//
+//    implementation deps.daggerhiltandroid
+//    kapt deps.daggerhiltCompoler
+//    implementation deps.room
+//    kapt deps.room_compiler
+//    implementation deps.ktxRoom
+//    implementation deps.paging
+//}
