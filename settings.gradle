@@ -20,12 +20,6 @@ dependencyResolutionManagement {
 
         google()
         mavenCentral()
-
-//        repositories {
-//            flatDir {
-//                dirs new File(rootProject.projectDir.getAbsolutePath() + '/libs')
-//            }
-//        }
     }
 }
 rootProject.name = "Cost"
