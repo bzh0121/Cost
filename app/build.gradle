@@ -24,4 +24,5 @@ dependencies {
     implementation project(path: ":add")
     implementation project(path: ":daily")
     implementation project(path: ":todo")
+    implementation project(path: ":woodenfish")
 }

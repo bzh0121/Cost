@@ -10,7 +10,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.ViewCompat
-import cc.bzzzh.cost.ui.theme.*
 
 private val DarkColorScheme = darkColorScheme(
     primary = Yellow80,

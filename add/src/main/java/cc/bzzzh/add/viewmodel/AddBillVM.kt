@@ -1,9 +1,6 @@
 package cc.bzzzh.add.viewmodel
 
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -24,9 +21,13 @@ import javax.inject.Inject
  * UiState for AddScreen
  */
 data class AddBillUiState(
-    val isLoading: Boolean = false,
-    val isExited: Boolean = false,
-    val userMessage: String? = null,
+    val isLoading: Boolean = false,     //正在加载
+    val isExited: Boolean = false,      //退出界面
+    val userMessage: String? = null,    //提示用户
+
+    val isCost: Boolean = true,          //是否是花费
+    val chosenSort: BillSort? = null,    //选中的账单类型
+    val date: String,                    //选中的日期
 )
 
 
@@ -38,13 +39,11 @@ class AddBillVM @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val billRepo: BillRepo
 ) : ViewModel() {
-    var isCost by mutableStateOf(true)   //是否是花费
-    var chosenSort by mutableStateOf<BillSort?>(null) //选中的账单类型
 
     private val preDate: String? = savedStateHandle[AddRouteParams.Date]
-    var date by mutableStateOf(preDate ?: DateUtils.getTodayDate())
 
-    private val _uiState = MutableStateFlow(AddBillUiState())
+    private val _uiState = MutableStateFlow(
+        AddBillUiState(date = preDate ?: DateUtils.getTodayDate()))
     val uiState = _uiState.asStateFlow()
 
     init {
@@ -57,25 +56,61 @@ class AddBillVM @Inject constructor(
         super.onCleared()
     }
 
+    /**
+     * 设定是否是花费
+     */
+    fun setIsCost(isCost: Boolean) {
+        _uiState.update { it.copy(
+            isCost = isCost
+        ) }
+    }
 
+    /**
+     * 设置选中的账单
+     */
+    fun setChosenSort(chosenSort: BillSort?) {
+        _uiState.update { it.copy(
+            chosenSort = chosenSort
+        ) }
+    }
+
+    /**
+     * 设置日期
+     */
+    fun setDate(date: String) {
+        _uiState.update { it.copy(
+            date = date
+        ) }
+    }
+
+
+    /**
+     * 获取支出分类
+     */
     fun getAllCostBillSort() : Flow<List<BillSort>> {
         return billRepo.getAllDisplayCostBillSort()
     }
 
+    /**
+     * 获取收入分类
+     */
     fun getAllPayoffBillSort() : Flow<List<BillSort>> {
         return billRepo.getAllDisplayPayoffBillSort()
     }
 
+    /**
+     * 保存账单
+     */
     fun saveBill(count: Double, remark: String, time: Long) {
         _uiState.update { it.copy(isLoading = true,) }
-        if (chosenSort != null) {
+        if (_uiState.value.chosenSort != null) {
             viewModelScope.launch {
                 billRepo.saveBill(
                     bill = Bill(
                         count = count,
-                        name = remark.ifEmpty { chosenSort?.name ?: "" },
+                        name = remark.ifEmpty { _uiState.value.chosenSort?.name ?: "" },
                         time = time,
-                        sortId = chosenSort?.id ?: 0
+                        sortId = _uiState.value.chosenSort?.id ?: 0
                     )
                 )
                 _uiState.update { it.copy(

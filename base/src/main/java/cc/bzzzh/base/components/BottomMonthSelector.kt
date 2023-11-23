@@ -9,7 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import cc.bzzzh.cost.ui.theme.DivideLine
+import cc.bzzzh.base.config.theme.DivideLine
 
 /**
  * todo 底部滚动月份选择器

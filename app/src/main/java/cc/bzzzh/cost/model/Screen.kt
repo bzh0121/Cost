@@ -1,10 +1,16 @@
-package cc.bzzzh.cost.view.bottom
+package cc.bzzzh.cost.model
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import cc.bzzzh.base.routeconfig.*
+import cc.bzzzh.base.routeconfig.AddRouteConfig
+import cc.bzzzh.base.routeconfig.ChartRouteConfig
+import cc.bzzzh.base.routeconfig.DailyRouteConfig
+import cc.bzzzh.base.routeconfig.DiscoverRouteConfig
+import cc.bzzzh.base.routeconfig.PersonRouteConfig
+import cc.bzzzh.base.routeconfig.WebViewRouteConfig
+import cc.bzzzh.base.routeconfig.WoodenFishRouteConfig
 import cc.bzzzh.cost.R
 
 /**
@@ -40,4 +46,5 @@ val bottomScreenItems = listOf(
 /**
  * 需要全屏显示的路由
  */
-val fullScreens = arrayOf(AddRouteConfig.ADD_PAGE, AddRouteConfig.DATE_SEL_PAGE)
+val fullScreens = arrayOf(AddRouteConfig.ADD_PAGE, AddRouteConfig.DATE_SEL_PAGE,
+    WoodenFishRouteConfig.WOODEN_FISH_PAGE, WebViewRouteConfig.WEB_VIEW_PAGE)

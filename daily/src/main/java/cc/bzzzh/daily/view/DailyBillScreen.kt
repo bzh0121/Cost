@@ -2,14 +2,19 @@ package cc.bzzzh.daily.view
 
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.*
@@ -19,9 +24,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -35,22 +43,34 @@ import cc.bzzzh.base.util.ktx.getDayStr
 import cc.bzzzh.base.util.ktx.getWeek
 import cc.bzzzh.daily.R
 import cc.bzzzh.daily.intent.DailyAction
+import cc.bzzzh.daily.model.DailyLink
+import cc.bzzzh.daily.model.dailyLinks
 import cc.bzzzh.daily.viewmodel.DailyBillVM
 
 
 /**
  * 明细界面
  */
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "ReturnFromAwaitPointerEventScope")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DailyBillScreen(
-    vm: DailyBillVM,
+    vm: DailyBillVM = hiltViewModel(),
     action: DailyAction,
 ) {
+    Log.d("dddlx", "DailyBillScreen: create")
+
+    val nestedScrollInterop = rememberNestedScrollInteropConnection()
+
+    //界面状态
     val uiState by vm.uiState.collectAsStateWithLifecycle()
 
+    //滚动状态
+    val lazyState = rememberLazyListState()
+
+    //snackbar位置
     val snackbarHostState = remember { SnackbarHostState() }
+    //观察userMessage
     uiState.userMessage?.let {
         LaunchedEffect(uiState.userMessage) {
             snackbarHostState.showSnackbar(
@@ -62,7 +82,8 @@ fun DailyBillScreen(
     }
 
     //账单集合
-    val billList = vm.getBillList().collectAsLazyPagingItems()
+//    val billList = vm.getBillList().collectAsLazyPagingItems()
+    val billList by rememberUpdatedState(vm.getBillList().collectAsLazyPagingItems())
     //每日总数
     val dailyCountList by vm.getDailySumCount().collectAsStateWithLifecycle(initialValue = listOf())
 
@@ -83,13 +104,23 @@ fun DailyBillScreen(
             //汇总统计
             DailyBillSumUpView(vm)
             //快捷链接
-            DailyBillLinkView()
+            DailyBillLinkView {
+                action.openLink(it)
+            }
 
             //账单列表
-            DailyListView(billList, dailyCountList) {
-                vm.delBill(it)
-            }
+            DailyListView(
+                lazyState,
+                billList,
+                dailyCountList,
+                {
+                    //edit
+                }, {
+                    vm.delBill(it)
+                }
+            )
         }
+
     }
 }
 
@@ -258,7 +289,7 @@ fun DailyBillSumUpView(vm: DailyBillVM) {
  * 账单等链接
  */
 @Composable
-fun DailyBillLinkView() {
+fun DailyBillLinkView(onLinkClick: (String) -> Unit) {
     Box(modifier = Modifier
         .background(
             Brush.verticalGradient(
@@ -278,8 +309,10 @@ fun DailyBillLinkView() {
             elevation =  CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
-                for (index in 0..4) {
-                    LinkItemView()
+                dailyLinks.forEach { dailyLink ->
+                    LinkItemView(dailyLink) { route ->
+                        onLinkClick(route)
+                    }
                 }
             }
         }
@@ -291,12 +324,14 @@ fun DailyBillLinkView() {
  */
 @Composable
 fun DailyListView(
+    state: LazyListState = rememberLazyListState(),
     billList: LazyPagingItems<BillWithSort>,
     dailyCountList: List<DailyCountTuple>,
+    onEdit: (Bill) -> Unit,
     onDel: (Bill) -> Unit
 ) {
 
-    LazyColumn {
+    LazyColumn(state = state) {
         itemsIndexed(billList, key = { _, data -> data.bill.id }) {index, data->
             data?.let {
                 val showGap = if (index == 0) {
@@ -313,45 +348,11 @@ fun DailyListView(
                             BillItemDayTitleView(it)
                         }
                     }
-                    BillItemView(data) {
+                    BillItemView(data, {
+                        onEdit.invoke(it)
+                    }, {
                         onDel.invoke(it)
-                    }
-                }
-            }
-        }
-    }
-}
-
-/**
- * 账单列表
- */
-@Composable
-fun DailyListView1(vm: DailyBillVM) {
-    //账单集合
-    val billList = vm.getBillList().collectAsLazyPagingItems()
-    //每日总数
-    val dailyCountList by vm.getDailySumCount().collectAsStateWithLifecycle(initialValue = listOf())
-
-    LazyColumn {
-        itemsIndexed(billList, key = { _, data -> data.bill.id }) {index, data->
-            data?.let {
-                val showGap = if (index == 0) {
-                    true
-                } else {
-                    val lastBill =  billList[index - 1]
-                    (lastBill?.bill?.time ?: 0) - data.bill.time >= 24*60*60*1000
-                }
-                Column {
-                    if (showGap) {
-                        dailyCountList.find {
-                            data.bill .time == it.time
-                        }?.let {
-                            BillItemDayTitleView(it)
-                        }
-                    }
-                    BillItemView(data) {
-                        vm.delBill(it)
-                    }
+                    })
                 }
             }
         }
@@ -363,18 +364,21 @@ fun DailyListView1(vm: DailyBillVM) {
  * 快捷链接点击项
  */
 @Composable
-fun RowScope.LinkItemView() {
-    Column(modifier = Modifier
-        .padding(10.dp)
-        .weight(1f),
+
+fun RowScope.LinkItemView(dailyLink: DailyLink, onLinkClick: (String) -> Unit) {
+    Column(
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .padding(10.dp)
+            .weight(1f)
+            .clickable { onLinkClick.invoke(dailyLink.route) }
     ) {
-        Image(painter = painterResource(id = R.drawable.bottom_items),
+        Image(painter = painterResource(id = dailyLink.resourceIcon),
             contentDescription = null,
             modifier = Modifier.size(30.dp)
         )
-        Text("账单", style = MaterialTheme.typography.bodySmall)
+        Text(stringResource(id = dailyLink.resourceId), style = MaterialTheme.typography.bodySmall)
     }
 }
 
@@ -384,10 +388,12 @@ fun RowScope.LinkItemView() {
 @Composable
 fun BillItemDayTitleView(dailyCountList: DailyCountTuple){
     Column(modifier = Modifier.fillMaxWidth()) {
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 5.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.White)
+                .padding(horizontal = 20.dp, vertical = 5.dp)
         ) {
             Text(text = "${dailyCountList.time.getDayStr()} ${dailyCountList.time.getWeek()}",
                 style = MaterialTheme.typography.bodySmall,
@@ -412,35 +418,78 @@ fun BillItemDayTitleView(dailyCountList: DailyCountTuple){
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun BillItemView(bean: BillWithSort, onDel: (Bill) -> Unit) {
-    Row(
-        modifier = Modifier
-            .combinedClickable(
-                enabled = true,
-                onLongClick = {
-                    onDel.invoke(bean.bill)
-                },
-                onDoubleClick = {
-                },
-                onClick = {
-                }
-            )
-            .padding(horizontal = 20.dp, vertical = 10.dp)
-        ,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Image(
-            painter = painterResource(bean.sort.icon),
-            contentDescription = null,
-            modifier = Modifier.size(20.dp)
-        )
-        Text(
-            text = bean.bill.name,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 10.dp)
-        )
-        Text(text = "-${bean.bill.count}")
-    }
+fun BillItemView(bean: BillWithSort,
+                 onEdit: (Bill) -> Unit,
+                 onDel: (Bill) -> Unit) {
+
+    //展示DropdownMenu
+    var expanded by remember { mutableStateOf(false) }
+
+   Box {
+       //账单内容
+       Row(
+           verticalAlignment = Alignment.CenterVertically,
+           modifier = Modifier
+               .combinedClickable(
+                   enabled = true,
+                   onLongClick = {
+                       expanded = true
+                   },
+                   onDoubleClick = {
+                   },
+                   onClick = {
+                       onEdit.invoke(bean.bill)
+                   }
+               )
+               .background(if (expanded) Color.Gray.copy(alpha = 0.2f) else Color.White)
+               .padding(horizontal = 20.dp, vertical = 10.dp)
+
+       ) {
+           Image(
+               painter = painterResource(bean.sort.icon),
+               contentDescription = null,
+               modifier = Modifier.size(20.dp)
+           )
+           Text(
+               text = bean.bill.name,
+               style = MaterialTheme.typography.bodyMedium,
+               modifier = Modifier
+                   .weight(1f)
+                   .padding(horizontal = 10.dp)
+           )
+           Text(text = "-${bean.bill.count}")
+       }
+
+       //下拉选项框
+       DropdownMenu(
+           expanded = expanded,
+           onDismissRequest = { expanded = false },
+           offset = DpOffset(20.dp, 0.dp),
+       ) {
+           DropdownMenuItem(
+               text = { Text("编辑") },
+               onClick = {
+                   expanded = false
+                   onEdit.invoke(bean.bill) },
+               leadingIcon = {
+                   Icon(
+                       Icons.Outlined.Edit,
+                       contentDescription = null
+                   )
+               })
+           Divider()
+           DropdownMenuItem(
+               text = { Text("删除") },
+               onClick = {
+                   expanded = false
+                   onDel.invoke(bean.bill)
+               },
+               leadingIcon = {
+                   Icon(
+                       Icons.Outlined.Delete,
+                       contentDescription = null
+                   )
+               })
+       }
+   }
 }

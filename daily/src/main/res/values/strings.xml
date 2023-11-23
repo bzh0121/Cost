@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">靓靓记账</string>
+    <string name="gongde">功德</string>
+    <string name="bill">账单</string>
 </resources>

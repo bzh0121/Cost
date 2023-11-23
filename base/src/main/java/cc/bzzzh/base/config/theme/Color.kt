@@ -1,4 +1,4 @@
-package cc.bzzzh.cost.ui.theme
+package cc.bzzzh.base.config.theme
 
 import androidx.compose.ui.graphics.Color
 

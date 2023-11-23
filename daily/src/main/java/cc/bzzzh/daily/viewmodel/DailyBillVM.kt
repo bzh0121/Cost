@@ -15,7 +15,12 @@ import cc.bzzzh.base.data.model.DailyCountTuple
 import cc.bzzzh.base.data.repo.BillRepo
 import cc.bzzzh.base.util.DateUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import javax.inject.Inject
@@ -27,6 +32,7 @@ data class DailyBillUiState(
     val isLoading: Boolean = false,
     val userMessage: String? = null,
     val idBillDeleted : Boolean = false,
+    val chosenBill: Bill? = null,       //选中的bill
 )
 
 /**
@@ -40,6 +46,9 @@ class DailyBillVM @Inject constructor(private val billRepo: BillRepo): ViewModel
     private val _uiState = MutableStateFlow(DailyBillUiState())
     val uiState: StateFlow<DailyBillUiState> = _uiState.asStateFlow()
 
+    /**
+     * 清理
+     */
     override fun onCleared() {
         Log.d("view_model", "onCleared: ")
         super.onCleared()
@@ -114,5 +123,41 @@ class DailyBillVM @Inject constructor(private val billRepo: BillRepo): ViewModel
         _uiState.update {
             it.copy(userMessage = null)
         }
+    }
+
+    /**
+     * 设置选择的bill
+     */
+    fun setChosenBill(chosenBill: Bill?) {
+        _uiState.update { it.copy(
+            chosenBill = chosenBill
+        ) }
+    }
+
+
+    /**
+     * 删除选中bill
+     */
+    fun delChosenBill() {
+        viewModelScope.launch {
+            _uiState.value.chosenBill?.let {bill ->
+                billRepo.delBill(bill)
+                _uiState.update {
+                    it.copy(
+                        userMessage = "删除完成！",
+                        chosenBill = null
+                    )
+                }
+            } ?: run {
+                _uiState.update {
+                    it.copy(
+                        userMessage = "删除失败！未选中账单",
+                        chosenBill = null
+                    )
+                }
+            }
+
+        }
+
     }
 }
